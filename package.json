@@ -34,6 +34,7 @@
     "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3"
+    "@types/node": "^25.0.3",
+    "prettier": "3.7.4"
   }
 }
