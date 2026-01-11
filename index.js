@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { connectDB, sequelize } = require('./lib/db.js');
-
+require('./lib/models/Relationship');
 const { passport } = require('./lib/passport');
 const authRouter = require('./routes/authRoutes.js');
 const publicRouter = require('./routes/publicRoutes.js');
