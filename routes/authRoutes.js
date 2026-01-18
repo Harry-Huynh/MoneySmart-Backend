@@ -1,6 +1,6 @@
 const express = require('express');
 const { passport } = require('../lib/passport');
-const transactionService = require('../lib/transaction-service');
+const transactionService = require('../lib/services/transaction-service');
 
 const router = express.Router();
 
