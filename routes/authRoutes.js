@@ -2,6 +2,7 @@ const express = require('express');
 const { passport } = require('../lib/passport');
 const transactionService = require('../lib/services/transaction-service');
 const savingGoalService = require('../lib/services/saving-goal-service');
+const budgetService = require('../lib/services/budget-service');
 
 const router = express.Router();
 
@@ -126,6 +127,80 @@ router.delete(
       const savingGoalId = req.params.id;
       const savingGoalMsg = await savingGoalService.deleteSavingGoal(userId, savingGoalId);
       return res.status(200).json({ message: savingGoalMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+// Budget Routes
+router.post('/budget', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const budgetMsg = await budgetService.addBudget(userId, req.body);
+    return res.status(201).json({ message: budgetMsg });
+  } catch (e) {
+    return res.status(422).json({ message: e.message });
+  }
+});
+
+router.get(
+  '/budget/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const budgetId = req.params.id;
+      const budget = await budgetService.getBudget(userId, budgetId);
+      return res.status(200).json({ budget });
+    } catch (e) {
+      return res.status(404).json({ message: e.message });
+    }
+  }
+);
+
+router.get('/budgets', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const budgets = await budgetService.getAllBudgets(userId);
+    return res.status(200).json({
+      count: budgets.length,
+      budgets,
+    });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+
+router.put(
+  '/budget/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const budgetId = req.params.id;
+      const budgetMsg = await budgetService.updateBudget(
+        userId,
+        budgetId,
+        req.body
+      );
+      return res.status(200).json({ message: budgetMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.delete(
+  '/budget/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const budgetId = req.params.id;
+      const budgetMsg = await budgetService.deleteBudget(userId, budgetId);
+      return res.status(200).json({ message: budgetMsg });
     } catch (e) {
       return res.status(422).json({ message: e.message });
     }
