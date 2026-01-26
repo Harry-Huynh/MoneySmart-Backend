@@ -3,6 +3,7 @@ const { passport } = require('../lib/passport');
 const transactionService = require('../lib/services/transaction-service');
 const savingGoalService = require('../lib/services/saving-goal-service');
 const budgetService = require('../lib/services/budget-service');
+const notificationService=require('../lib/services/notification-service');
 
 const router = express.Router();
 
@@ -201,6 +202,115 @@ router.delete(
       const budgetId = req.params.id;
       const budgetMsg = await budgetService.deleteBudget(userId, budgetId);
       return res.status(200).json({ message: budgetMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+// notification routes
+router.post('/notification', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const notificationMsg = await notificationService.addNotification(userId, req.body);
+    return res.status(201).json({ message: notificationMsg });
+  } catch (e) {
+    return res.status(422).json({ message: e.message });
+  }
+});
+
+router.get(
+  '/notifications/unread',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const notifications = await notificationService.getUnreadNotifications(userId);
+      return res.status(200).json({ 
+        count: notifications.length,
+        notifications 
+      });
+    } catch (e) {
+      return res.status(404).json({ message: e.message });
+    }
+  }
+);
+
+router.get('/notifications', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const notifications = await notificationService.getAllNotifications(userId);
+    return res.status(200).json({
+      count: notifications.length,
+      notifications
+    });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+});
+
+router.get(
+  '/notification/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const notificationId = req.params.id;
+      const notificationMsg = await notificationService.getNotification(
+        userId,
+        notificationId
+      );
+      return res.status(200).json({ message: notificationMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.put(
+  '/notification/:id/read',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const notificationId = req.params.id;
+      const notificationMsg = await notificationService.markNotificationAsRead(
+        userId,
+        notificationId
+      );
+      return res.status(200).json({ message: notificationMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.put(
+  '/notifications/read-all',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const notificationMsg = await notificationService.markAllNotificationsAsRead(userId);
+      return res.status(200).json({ message: notificationMsg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.delete(
+  '/notification/:id',
+ passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const notificationId = req.params.id;
+      const notificationMsg = await notificationService.deleteNotification(
+        userId,
+        notificationId
+      );
+      return res.status(200).json({ message: notificationMsg });
     } catch (e) {
       return res.status(422).json({ message: e.message });
     }
