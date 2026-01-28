@@ -3,7 +3,7 @@ const { passport } = require('../lib/passport');
 const transactionService = require('../lib/services/transaction-service');
 const savingGoalService = require('../lib/services/saving-goal-service');
 const budgetService = require('../lib/services/budget-service');
-const notificationService=require('../lib/services/notification-service');
+const notificationService = require('../lib/services/notification-service');
 
 const router = express.Router();
 
@@ -36,7 +36,13 @@ router.get(
 router.get('/transactions', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const userId = req.user.userId;
-    const transactions = await transactionService.getAllTransactions(userId);
+    const type = req.query.type;
+    let transactions = [];
+    if (type) {
+      transactions = await transactionService.getTransactionsByType(userId, type);
+    } else {
+      transactions = await transactionService.getAllTransactions(userId);
+    }
     return res.status(200).json({
       count: transactions.length,
       transactions,
@@ -228,9 +234,9 @@ router.get(
     try {
       const userId = req.user.userId;
       const notifications = await notificationService.getUnreadNotifications(userId);
-      return res.status(200).json({ 
+      return res.status(200).json({
         count: notifications.length,
-        notifications 
+        notifications,
       });
     } catch (e) {
       return res.status(404).json({ message: e.message });
@@ -244,7 +250,7 @@ router.get('/notifications', passport.authenticate('jwt', { session: false }), a
     const notifications = await notificationService.getAllNotifications(userId);
     return res.status(200).json({
       count: notifications.length,
-      notifications
+      notifications,
     });
   } catch (e) {
     return res.status(500).json({ message: e.message });
@@ -258,10 +264,7 @@ router.get(
     try {
       const userId = req.user.userId;
       const notificationId = req.params.id;
-      const notificationMsg = await notificationService.getNotification(
-        userId,
-        notificationId
-      );
+      const notificationMsg = await notificationService.getNotification(userId, notificationId);
       return res.status(200).json({ message: notificationMsg });
     } catch (e) {
       return res.status(422).json({ message: e.message });
@@ -303,15 +306,12 @@ router.put(
 
 router.delete(
   '/notification/:id',
- passport.authenticate('jwt', { session: false }),
+  passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     try {
       const userId = req.user.userId;
       const notificationId = req.params.id;
-      const notificationMsg = await notificationService.deleteNotification(
-        userId,
-        notificationId
-      );
+      const notificationMsg = await notificationService.deleteNotification(userId, notificationId);
       return res.status(200).json({ message: notificationMsg });
     } catch (e) {
       return res.status(422).json({ message: e.message });
