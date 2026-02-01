@@ -183,8 +183,19 @@ router.get('/budget/:id', passport.authenticate('jwt', { session: false }), asyn
 
 router.get('/budgets', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
+    const month = req.query.month;
+    const year = req.query.year;
+
     const userId = req.user.userId;
-    const budgets = await budgetService.getAllBudgets(userId);
+
+    let budgets;
+
+    if (month && year) {
+      budgets = await budgetService.getBudgetsByMonthAndYear(userId, month, year);
+    } else {
+      budgets = await budgetService.getAllBudgets(userId);
+    }
+
     return res.status(200).json({
       count: budgets.length,
       budgets,
