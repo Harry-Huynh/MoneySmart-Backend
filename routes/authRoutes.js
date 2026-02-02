@@ -37,9 +37,13 @@ router.get('/transactions', passport.authenticate('jwt', { session: false }), as
   try {
     const userId = req.user.userId;
     const type = req.query.type;
+    const month = req.query.month;
+    const year = req.query.year;
     let transactions = [];
     if (type) {
       transactions = await transactionService.getTransactionsByType(userId, type);
+    } else if (month && year) {
+      transactions = await transactionService.getTransactionByMonthAndYear(userId, month, year);
     } else {
       transactions = await transactionService.getAllTransactions(userId);
     }
