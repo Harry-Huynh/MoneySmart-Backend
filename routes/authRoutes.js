@@ -4,6 +4,7 @@ const transactionService = require('../lib/services/transaction-service');
 const savingGoalService = require('../lib/services/saving-goal-service');
 const budgetService = require('../lib/services/budget-service');
 const notificationService = require('../lib/services/notification-service');
+const notificationSettingService = require('../lib/services/notification-setting-service');
 const  User  = require("../lib/models/User");
 
 const router = express.Router();
@@ -336,61 +337,28 @@ router.delete(
 );
 
 // notification-setting route
-// GET settings 
-router.get("/notification-settings", passport.authenticate('jwt', { session: false }), async (req, res) =>{
-  const userId = req.user.userId;
-  const user = await User.findByPk(userId);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  return res.json({ settings: user.notificationSettings });
-});
-
-// update any toggle
-router.patch("/notification-settings",passport.authenticate('jwt', { session: false }), async (req, res) => {
-  try {
-    const userId = req.user.userId;
-    const user = await User.findByPk(userId);
-    if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-    const allowed = [
-      "enableNotifications",
-      "pushNotifications",
-      "emailNotifications",
-      "billReminders",
-      "budgetAlerts",
-      "savingsGoalReminders",
-      "aiInsights"
-    ];
-
-    const current = user.notificationSettings || {};
-    const next = { ...current };
-
-    for (const key of allowed) {
-      if (req.body[key] !== undefined) {
-        if (typeof req.body[key] !== "boolean") {
-          return res.status(422).json({ message: `${key} must be boolean` });
-        }
-        next[key] = req.body[key];
-      }
+// get settings 
+router.get("/notification-settings", passport.authenticate("jwt", { session: false }), async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const settings = await notificationSettingService.getNotificationSettings(userId);
+      return res.status(200).json({ settings });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
     }
-
-    if (next.enableNotifications === false) {
-      next.pushNotifications = false;
-      next.emailNotifications = false;
-    }
-
-    user.notificationSettings = next;
-    await user.save();
-
-    return res.json({ settings: user.notificationSettings });
-  } catch (e) {
-    return res.status(500).json({ message: e.message });
   }
-});
+);
 
+// update 
+router.put("/notification-settings", passport.authenticate("jwt", { session: false }), async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const msg = await notificationSettingService.updateNotificationSettings(userId, req.body);
+      return res.status(200).json({ message: msg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
 
 module.exports = router;
