@@ -5,7 +5,7 @@ const savingGoalService = require('../lib/services/saving-goal-service');
 const budgetService = require('../lib/services/budget-service');
 const notificationService = require('../lib/services/notification-service');
 const notificationSettingService = require('../lib/services/notification-setting-service');
-const  User  = require("../lib/models/User");
+const userService = require('../lib/services/user-service');
 
 const router = express.Router();
 
@@ -337,8 +337,11 @@ router.delete(
 );
 
 // notification-setting route
-// get settings 
-router.get("/notification-settings", passport.authenticate("jwt", { session: false }), async (req, res) => {
+// get settings
+router.get(
+  '/notification-settings',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
     try {
       const userId = req.user.userId;
       const settings = await notificationSettingService.getNotificationSettings(userId);
@@ -349,12 +352,61 @@ router.get("/notification-settings", passport.authenticate("jwt", { session: fal
   }
 );
 
-// update 
-router.put("/notification-settings", passport.authenticate("jwt", { session: false }), async (req, res) => {
+// update
+router.put(
+  '/notification-settings',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
     try {
       const userId = req.user.userId;
       const msg = await notificationSettingService.updateNotificationSettings(userId, req.body);
       return res.status(200).json({ message: msg });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+// Security Setting - Change Password
+// Verify Password
+router.post(
+  '/user/verify-password',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const { password } = req.body;
+      const isMatch = await userService.verifyPassword(userId, password);
+      return res.status(200).json({ success: isMatch });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.put(
+  '/user/change-password',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const { newPassword } = req.body;
+      const isSuccess = await userService.changePassword(userId, newPassword);
+      return res.status(200).json({ success: isSuccess });
+    } catch (e) {
+      return res.status(422).json({ message: e.message });
+    }
+  }
+);
+
+router.get(
+  '/user/change-password/date',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      const userId = req.user.userId;
+      const lastChangeDate = await userService.getLastPasswordChangeDate(userId);
+      return res.status(200).json({ lastChangeDate: lastChangeDate });
     } catch (e) {
       return res.status(422).json({ message: e.message });
     }
