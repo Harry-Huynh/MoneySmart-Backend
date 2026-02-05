@@ -9,6 +9,19 @@ const userService = require('../lib/services/user-service');
 
 const router = express.Router();
 
+// Account Setting Routes
+router.get(
+  "/user/me", passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const profile = await userService.getUserProfileById(req.user.userId);
+      return res.status(200).json(profile);
+    } catch (e) {
+      return res.status(500).json({ message: e.message });
+    }
+  }
+);
+
 // Transaction Routes
 router.post('/transaction', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
