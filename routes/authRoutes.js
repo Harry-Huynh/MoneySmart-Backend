@@ -414,41 +414,28 @@ router.get(
 );
 
 // Account Setting Routes
-router.get(
-  "/user/me", passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    try {
-      const profile = await userService.getUserProfileById(req.user.userId);
-      return res.status(200).json(profile);
-    } catch (e) {
-      return res.status(500).json({ message: e.message });
-    }
+router.get('/user/me', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const profile = await userService.getUserProfileById(req.user.userId);
+    return res.status(200).json(profile);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
   }
-);
+});
 
-router.put(
-  "/user/me",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    try {
-      const allowedDateFormats = ["MM-DD-YYYY", "DD-MM-YYYY", "YYYY-MM-DD"];
-      if (
-        req.body.dateFormat &&
-        !allowedDateFormats.includes(req.body.dateFormat)
-      ) {
-        return res.status(400).json({ message: "Invalid dateFormat" });
-      }
-
-      const updated = await userService.updateCustomerProfileByUserId(
-        req.user.userId,
-        req.body
-      );
-
-      return res.status(200).json(updated);
-    } catch (e) {
-      return res.status(500).json({ message: e.message });
+router.put('/user/me', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const allowedDateFormats = ['MM-DD-YYYY', 'DD-MM-YYYY', 'YYYY-MM-DD'];
+    if (req.body.dateFormat && !allowedDateFormats.includes(req.body.dateFormat)) {
+      return res.status(400).json({ message: 'Invalid dateFormat' });
     }
+
+    const updated = await userService.updateCustomerProfileByUserId(req.user.userId, req.body);
+
+    return res.status(200).json(updated);
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
   }
-);
+});
 
 module.exports = router;
