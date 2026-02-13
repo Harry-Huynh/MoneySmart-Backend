@@ -237,8 +237,16 @@ router.delete('/budget/:id', passport.authenticate('jwt', { session: false }), a
 router.post('/notification', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const userId = req.user.userId;
-    const notificationMsg = await notificationService.addNotification(userId, req.body);
-    return res.status(201).json({ message: notificationMsg });
+    const type = req.query.type;
+    const isSuccessful = await notificationService.addNotification(userId, req.body, type);
+
+    if (!isSuccessful) {
+      return res
+        .status(400)
+        .json({ message: 'Notification could not be created because the settings are not set.' });
+    }
+
+    return res.status(201).json({ message: 'Notification created successfully' });
   } catch (e) {
     return res.status(422).json({ message: e.message });
   }
