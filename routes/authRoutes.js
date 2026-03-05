@@ -80,11 +80,7 @@ router.put(
     try {
       const userId = req.user.userId;
       const transactionId = req.params.id;
-      const result = await transactionService.updateTransaction(
-        userId,
-        transactionId,
-        req.body
-      );
+      const result = await transactionService.updateTransaction(userId, transactionId, req.body);
       return res.status(201).json(result);
     } catch (e) {
       return res.status(422).json({ message: e.message });
