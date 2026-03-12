@@ -190,10 +190,16 @@ router.get('/budgets', passport.authenticate('jwt', { session: false }), async (
 
     const userId = req.user.userId;
 
+    // This endMonth and endYear are used to query budgets in recent 3 months
+    const endMonth = req.query.endMonth;
+    const endYear = req.query.endYear;
+
     let budgets;
 
     if (month && year) {
       budgets = await budgetService.getBudgetsByMonthAndYear(userId, month, year);
+    } else if (endMonth && endYear) {
+      budgets = await budgetService.getAllBudgetsOfRecentThreeMonths(userId, endMonth, endYear);
     } else {
       budgets = await budgetService.getAllBudgets(userId);
     }
