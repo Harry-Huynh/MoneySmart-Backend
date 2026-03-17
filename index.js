@@ -6,7 +6,6 @@ const cors = require('cors');
 const { connectDB, sequelize } = require('./lib/db.js');
 require('./lib/models/User');
 require('./lib/models/Customer');
-require('./lib/models/Currency');
 require('./lib/models/Relationship');
 const { passport } = require('./lib/passport');
 const authRouter = require('./routes/authRoutes.js');
