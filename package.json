@@ -5,8 +5,13 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_ENV=test jest --runInBand",
     "start": "nodemon index.js"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/lib/tests/setup.js"
+    ]
   },
   "repository": {
     "type": "git",
@@ -36,7 +41,9 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "jest": "^30.3.0",
     "nodemon": "^3.1.11",
-    "prettier": "^3.7.4"
+    "prettier": "^3.7.4",
+    "supertest": "^7.2.2"
   }
 }
